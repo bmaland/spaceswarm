@@ -58,15 +58,12 @@ class GameObject(object):
         self._location = location
 
     def render(self, surface):
-        x, y = self._location.x, self._location.y
-        w, h = self._image.get_size()
-        surface.blit(self._image, (x-w/2, y-h/2))
+        surface.blit(self._image, self._location)
 
 class Explosion(GameObject):
     def __init__(self, image, location):
         GameObject.__init__(self, image, location)
-        print location
-        self._ttl = 5
+        self._ttl = 5 # number of frames explosion should be visible
 
     def render(self, surface):
         super(Explosion, self).render(surface)
