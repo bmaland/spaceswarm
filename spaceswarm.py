@@ -253,7 +253,7 @@ while True:
     pygame.mixer.music.stop()
     game_over_sound.play()
     draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
-             (WINDOWHEIGHT / 3))
+             (WINDOWHEIGHT / 3), RED)
     draw_text('Press a key to play again, or Esc to quit.', font,
              screen, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 50)
     pygame.display.update()
