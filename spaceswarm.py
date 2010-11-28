@@ -16,6 +16,12 @@ TEXTCOLOR = WHITE
 BACKGROUNDCOLOR = BLACK
 FPS = 40
 
+random.seed()
+pygame.init()
+pygame.mouse.set_visible(False) # we blit the mouse instead
+screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
+pygame.display.set_caption('Space Swarm!')
+
 def load_image(name):
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname)
@@ -61,8 +67,10 @@ class GameObject(object):
         surface.blit(self._image, self._location)
 
 class Explosion(GameObject):
-    def __init__(self, image, location):
-        GameObject.__init__(self, image, location)
+    ExplosionImage = load_image("explosion.png")
+
+    def __init__(self, location):
+        GameObject.__init__(self, Explosion.ExplosionImage, location)
         self._ttl = 5 # number of frames explosion should be visible
 
     def render(self, surface):
@@ -148,12 +156,6 @@ def move(obj, time_passed_secords, speed):
     obj['rect'].x = position.x
     obj['rect'].y = position.y
 
-random.seed()
-pygame.init()
-pygame.mouse.set_visible(False) # we blit the mouse instead
-
-screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-pygame.display.set_caption('Space Swarm!')
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
 bullet_speed = 400
@@ -164,7 +166,6 @@ font = pygame.font.SysFont(None, 32)
 
 # Load resources
 alien_image = load_image("alien.png")
-explosion_image = load_image("explosion.png")
 player_image = load_image("player.png")
 bullet_image = load_image("bullet.png")
 scope_image = load_image("scope.png")
@@ -244,7 +245,7 @@ while True:
                     score += 10 * level # increase kill score as we progress
                     alien_killed_sound.play()
                     aliens.remove(a)
-                    explosions.append(Explosion(explosion_image, a['rect']))
+                    explosions.append(Explosion(a['rect']))
                     bullets.remove(b)
                     if remaining_aliens == 0 and len(aliens) == 0:
                         levelup_sound.play()
