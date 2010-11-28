@@ -52,6 +52,29 @@ def draw_text(text, font, surface, x, y, color=TEXTCOLOR):
     rect.topleft = (x, y)
     surface.blit(text, rect)
 
+class GameObject(object):
+    def __init__(self, image, location):
+        self._image = image
+        self._location = location
+
+    def render(self, surface):
+        x, y = self._location.x, self._location.y
+        w, h = self._image.get_size()
+        surface.blit(self._image, (x-w/2, y-h/2))
+
+class Explosion(GameObject):
+    def __init__(self, image, location):
+        GameObject.__init__(self, image, location)
+        print location
+        self._ttl = 5
+
+    def render(self, surface):
+        super(Explosion, self).render(surface)
+        self._ttl -= 1
+
+    def is_finished(self):
+        return self._ttl == 0
+
 def new_alien():
     spawn_loc = random.randint(0, 3)
     x,y = 0,0
@@ -144,11 +167,12 @@ font = pygame.font.SysFont(None, 32)
 
 # Load resources
 alien_image = load_image("alien.png")
+explosion_image = load_image("explosion.png")
 player_image = load_image("player.png")
 bullet_image = load_image("bullet.png")
 scope_image = load_image("scope.png")
 weapon_sound = load_sound("weapon.wav")
-alien_killed_sound = load_sound("alienkilled.wav")
+alien_killed_sound = load_sound("alienkilled.wav") # TODO get a better one
 game_over_sound = load_sound("gameover.wav")
 levelup_sound = load_sound("levelup.wav")
 pygame.mixer.music.load("data/background.mid")
@@ -171,7 +195,7 @@ screen.blit(player_image, player)
 while True:
     # setup
     game_over = False
-    aliens, bullets = [], []
+    aliens, bullets, explosions = [], [], []
     aliens.append(new_alien())
     aliens_killed = 0
     alien_spawn_timer = 0
@@ -220,9 +244,10 @@ while True:
             for a in aliens:
                 if b['rect'].colliderect(a['rect']): # alien shot down!
                     aliens_killed += 1
-                    score += 10 * level
+                    score += 10 * level # increase kill score as we progress
                     alien_killed_sound.play()
                     aliens.remove(a)
+                    explosions.append(Explosion(explosion_image, a['rect']))
                     bullets.remove(b)
                     if remaining_aliens == 0 and len(aliens) == 0:
                         levelup_sound.play()
@@ -245,6 +270,11 @@ while True:
 
         for b in bullets: screen.blit(b['surface'], b['rect'])
         for a in aliens: screen.blit(a['surface'], a['rect'])
+        for e in explosions:
+            if e.is_finished():
+                explosions.remove(e)
+            else:
+                e.render(screen)
         screen.blit(player_image, player)
         screen.blit(scope_image, pygame.mouse.get_pos())
         pygame.display.update()
