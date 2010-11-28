@@ -217,9 +217,6 @@ while True:
         for b in bullets:
             move(b, time_passed_seconds, bullet_speed)
 
-            if not screen.get_rect().contains(b['rect']):
-                bullets.remove(b)
-
             for a in aliens:
                 if b['rect'].colliderect(a['rect']): # alien shot down!
                     aliens_killed += 1
@@ -233,6 +230,9 @@ while True:
                         spawn_rate, alien_speed, alien_multiplier, \
                                     remaining_aliens = new_level(level)
                         alien_spawn_timer = 0
+
+            if not screen.get_rect().contains(b['rect']):
+                bullets.remove(b)
 
         # Redraw screen
         screen.blit(bg, (0,0))
