@@ -59,12 +59,22 @@ def draw_text(text, font, surface, x, y, color=TEXTCOLOR):
     surface.blit(text, rect)
 
 class GameObject(object):
-    def __init__(self, image, location):
+    def __init__(self, image, location, destination=None):
         self._image = image
-        self._location = location
+        self.location = location
+        self.destination = destination
 
     def render(self, surface):
-        surface.blit(self._image, self._location)
+        surface.blit(self._image, self.location)
+
+    def move(self, time_passed_secords, speed):
+        dv = Vector2(self.destination)
+        lv = Vector2(self.location.x, self.location.y)
+        heading = Vector2.from_points(lv, dv)
+        heading.normalize()
+        new_position = lv + heading * time_passed_seconds * speed
+        self.location.x = new_position.x
+        self.location.y = new_position.y
 
 class Explosion(GameObject):
     ExplosionImage = load_image("explosion.png")
@@ -73,6 +83,9 @@ class Explosion(GameObject):
         GameObject.__init__(self, Explosion.ExplosionImage, location)
         self._ttl = 5 # number of frames explosion should be visible
 
+    def move(self):
+        raise
+
     def render(self, surface):
         super(Explosion, self).render(surface)
         self._ttl -= 1
@@ -80,27 +93,35 @@ class Explosion(GameObject):
     def is_finished(self):
         return self._ttl == 0
 
-def new_alien():
-    spawn_loc = random.randint(0, 3)
-    x,y = 0,0
-    if spawn_loc == 0: # top
-        x = random.randint(0, WINDOWWIDTH)
-        y = 0
-    elif spawn_loc == 1: # right
-        x = WINDOWWIDTH
-        y = random.randint(0, WINDOWHEIGHT)
-    elif spawn_loc == 2: # bottom
-        x = random.randint(0, WINDOWWIDTH)
-        y = WINDOWHEIGHT
-    elif spawn_loc == 3: # left
-        x = 0
-        y = random.randint(0, WINDOWHEIGHT)
-    return {
-        'rect': pygame.Rect(x, y, 50, 50),
-        'surface': alien_image,
-        'dx': WINDOWHEIGHT/2,
-        'dy': WINDOWWIDTH/2,
-        }
+class Alien(GameObject):
+    AlienImage = load_image("alien.png")
+
+    def __init__(self):
+        GameObject.__init__(self, Alien.AlienImage,
+                            self._random_spawn_location(),
+                            (WINDOWWIDTH/2, WINDOWHEIGHT/2))
+
+    def _random_spawn_location(self):
+        """
+        Figures out where the alien should be spawned, which should be somewhere
+        along the edges of the screen.
+        """
+        spawn_loc = random.randint(0, 3)
+        x,y = 0,0
+        if spawn_loc == 0: # top
+            x = random.randint(0, WINDOWWIDTH)
+            y = 0
+        elif spawn_loc == 1: # right
+            x = WINDOWWIDTH
+            y = random.randint(0, WINDOWHEIGHT)
+        elif spawn_loc == 2: # bottom
+            x = random.randint(0, WINDOWWIDTH)
+            y = WINDOWHEIGHT
+        elif spawn_loc == 3: # left
+            x = 0
+            y = random.randint(0, WINDOWHEIGHT)
+        width, height = Alien.AlienImage.get_size()
+        return pygame.Rect(x, y, width, height)
 
 def new_bullet(mouse_pos):
     dx,dy = mouse_pos
@@ -165,7 +186,6 @@ title_font = pygame.font.SysFont(None, 48)
 font = pygame.font.SysFont(None, 32)
 
 # Load resources
-alien_image = load_image("alien.png")
 player_image = load_image("player.png")
 bullet_image = load_image("bullet.png")
 scope_image = load_image("scope.png")
@@ -194,7 +214,7 @@ while True:
     # setup
     game_over = False
     aliens, bullets, explosions = [], [], []
-    aliens.append(new_alien())
+    aliens.append(Alien())
     aliens_killed = 0
     alien_spawn_timer = 0
     score = 0
@@ -222,7 +242,7 @@ while True:
             alien_spawn_timer = 0
             if remaining_aliens:
                 for i in range(alien_multiplier):
-                    aliens.append(new_alien())
+                    aliens.append(Alien())
                     remaining_aliens -= 1
                     if not remaining_aliens: break
 
@@ -230,8 +250,8 @@ while True:
         time_passed_seconds = clock.tick(FPS) / 1000.
 
         for a in aliens: # move all aliens closer towards player
-            move(a, time_passed_seconds, alien_speed)
-            if a['rect'].colliderect(player):
+            a.move(time_passed_seconds, alien_speed)
+            if player.colliderect(a.location):
                 game_over = True
                 break
         if game_over: break
@@ -240,12 +260,12 @@ while True:
             move(b, time_passed_seconds, bullet_speed)
 
             for a in aliens:
-                if b['rect'].colliderect(a['rect']): # alien shot down!
+                if b['rect'].colliderect(a.location): # alien shot down!
                     aliens_killed += 1
                     score += 10 * level # increase kill score as we progress
                     alien_killed_sound.play()
                     aliens.remove(a)
-                    explosions.append(Explosion(a['rect']))
+                    explosions.append(Explosion(a.location))
                     bullets.remove(b)
                     if remaining_aliens == 0 and len(aliens) == 0:
                         levelup_sound.play()
@@ -267,7 +287,7 @@ while True:
         draw_text('Score: %s' % (score), font, screen, WINDOWWIDTH/2, 20)
 
         for b in bullets: screen.blit(b['surface'], b['rect'])
-        for a in aliens: screen.blit(a['surface'], a['rect'])
+        for a in aliens: a.render(screen)
         for e in explosions:
             if e.is_finished():
                 explosions.remove(e)
