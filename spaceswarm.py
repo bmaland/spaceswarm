@@ -187,7 +187,7 @@ font = pygame.font.SysFont(None, 32)
 player_image = load_image("player.png")
 scope_image = load_image("scope.png")
 weapon_sound = load_sound("weapon.wav")
-alien_killed_sound = load_sound("alienkilled.wav") # TODO get a better one
+alien_killed_sound = load_sound("alienkilled.wav")
 game_over_sound = load_sound("gameover.wav")
 levelup_sound = load_sound("levelup.wav")
 pygame.mixer.music.load("data/background.mid")
@@ -299,7 +299,7 @@ while True:
     game_over_sound.play()
     draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
              (WINDOWHEIGHT / 3), RED)
-    draw_text('Press a key to play again, or Esc to quit.', font,
+    draw_text('Press any key to play again, or Esc to quit.', font,
              screen, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 50)
     pygame.display.update()
     wait_for_player()
