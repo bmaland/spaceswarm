@@ -208,8 +208,8 @@ while True:
         for event in pygame.event.get():
             if event.type is MOUSEBUTTONDOWN: # weapon fired
                 weapon_sound.play()
-                if score > 5 * level: # each bullet costs score
-                    score -= 5 * level
+                score -= 5 * level # each bullet costs score
+                if score < 0: score = 0
                 bullets.append(new_bullet(pygame.mouse.get_pos()))
             elif event.type is KEYDOWN:
                 if event.key == K_ESCAPE:
