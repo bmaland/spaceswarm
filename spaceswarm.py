@@ -94,10 +94,11 @@ class Explosion(GameObject):
         return self._ttl == 0
 
 class Alien(GameObject):
-    AlienImage = load_image("alien.png")
+    image = load_image("alien.png")
+    width, height = image.get_size()
 
     def __init__(self):
-        GameObject.__init__(self, Alien.AlienImage,
+        GameObject.__init__(self, Alien.image,
                             self._random_spawn_location(),
                             (WINDOWWIDTH/2, WINDOWHEIGHT/2))
 
@@ -120,27 +121,36 @@ class Alien(GameObject):
         elif spawn_loc == 3: # left
             x = 0
             y = random.randint(0, WINDOWHEIGHT)
-        width, height = Alien.AlienImage.get_size()
-        return pygame.Rect(x, y, width, height)
 
-def new_bullet(mouse_pos):
-    dx,dy = mouse_pos
-    # Figure out the destination coords for the bullet, starting from the center
-    # of the screen through the point the player click, to the edge of the
-    # screen.
-    step = Vector2.from_points((WINDOWHEIGHT/2,WINDOWWIDTH/2),
-                               (dx,dy)) * 0.1
-    while True:
-        if dx > 600 or dy > 600 or dx < 1 or dy < 1:
-            break
-        dx += step.x
-        dy += step.y
-    return {
-        'rect': pygame.Rect(WINDOWWIDTH/2, WINDOWHEIGHT/2, 1, 1),
-        'surface': bullet_image,
-        'dx': dx,
-        'dy': dy,
-        }
+        return pygame.Rect(x, y, Alien.width, Alien.height)
+
+class Bullet(GameObject):
+    image = load_image("bullet.png")
+    width, height = image.get_size()
+
+    def __init__(self, location):
+        GameObject.__init__(self, Bullet.image,
+                            pygame.Rect(WINDOWWIDTH/2, WINDOWHEIGHT/2,
+                                        Bullet.width, Bullet.height),
+                            self._calculate_destination(location))
+
+    def _calculate_destination(self, mouse_pos):
+        """
+        Figure out the destination coords for the bullet, starting from the
+        center of the screen through the point the player click, to the edge
+        of the screen.
+        """
+        dx,dy = mouse_pos
+
+        step = Vector2.from_points((WINDOWWIDTH/2,WINDOWHEIGHT/2),
+                                   (dx,dy)) * 0.1
+        while True:
+            if dx > 600 or dy > 600 or dx < 1 or dy < 1:
+                break
+            dx += step.x
+            dy += step.y
+
+        return (dx, dy)
 
 def new_level(level):
     """
@@ -187,7 +197,6 @@ font = pygame.font.SysFont(None, 32)
 
 # Load resources
 player_image = load_image("player.png")
-bullet_image = load_image("bullet.png")
 scope_image = load_image("scope.png")
 weapon_sound = load_sound("weapon.wav")
 alien_killed_sound = load_sound("alienkilled.wav") # TODO get a better one
@@ -230,7 +239,7 @@ while True:
                 weapon_sound.play()
                 score -= 5 * level # each bullet costs score
                 if score < 0: score = 0
-                bullets.append(new_bullet(pygame.mouse.get_pos()))
+                bullets.append(Bullet(pygame.mouse.get_pos()))
             elif event.type is KEYDOWN:
                 if event.key == K_ESCAPE:
                     terminate()
@@ -257,10 +266,10 @@ while True:
         if game_over: break
 
         for b in bullets:
-            move(b, time_passed_seconds, bullet_speed)
+            b.move(time_passed_seconds, bullet_speed)
 
             for a in aliens:
-                if b['rect'].colliderect(a.location): # alien shot down!
+                if b.location.colliderect(a.location): # alien shot down!
                     aliens_killed += 1
                     score += 10 * level # increase kill score as we progress
                     alien_killed_sound.play()
@@ -274,7 +283,7 @@ while True:
                                     remaining_aliens = new_level(level)
                         alien_spawn_timer = 0
 
-            if not screen.get_rect().contains(b['rect']):
+            if not screen.get_rect().contains(b.location):
                 bullets.remove(b)
 
         # Redraw screen
@@ -286,7 +295,7 @@ while True:
                  font, screen, WINDOWWIDTH/2, 0)
         draw_text('Score: %s' % (score), font, screen, WINDOWWIDTH/2, 20)
 
-        for b in bullets: screen.blit(b['surface'], b['rect'])
+        for b in bullets: b.render(screen)
         for a in aliens: a.render(screen)
         for e in explosions:
             if e.is_finished():
