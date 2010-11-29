@@ -11,6 +11,10 @@ The only dependency except Python is pygame. Install it through your package
 manager, or download from http://pygame.org/download.shtml. Version 1.8.1+
 should be fine. Next, simply run spaceswarm.py. Have fun!
 
+# Screenshot
+
+![Space Swarm Screenshot](http://pygame.org/shots/1705.png)
+
 # Credits
 
 The wave files were found on the internet and are (c) their respective
