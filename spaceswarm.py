@@ -108,10 +108,16 @@ class Alien(GameObject):
     image = load_image("alien.png")
     width, height = image.get_size()
 
-    def __init__(self):
-        GameObject.__init__(self, Alien.image,
+    def __init__(self, speed=100, img=None):
+        if img is None: img = Alien.image
+        GameObject.__init__(self, img,
                             self._random_spawn_location(),
                             (WINDOWWIDTH/2, WINDOWHEIGHT/2))
+        self._speed = speed
+
+    def speed(self):
+        """ Gives a slight random variation in speed for every alien """
+        return self._speed + random.randint(-5, 5)
 
     def _random_spawn_location(self):
         """
@@ -134,6 +140,36 @@ class Alien(GameObject):
             y = random.randint(0, WINDOWHEIGHT)
 
         return pygame.Rect(x, y, Alien.width, Alien.height)
+
+    def move(self, time_passed_seconds):
+        super(Alien, self).move(time_passed_seconds, self.speed())
+
+class SmartAlien(Alien):
+    image = load_image("smart_alien.png")
+    width, height = image.get_size()
+
+    def __init__(self, speed=100):
+        Alien.__init__(self, speed, SmartAlien.image)
+        self._true_destination = self.destination
+        self._new_destination()
+
+    def _new_destination(self):
+        lv = Vector2(self.location.x, self.location.y)
+        candidates = get_n_points_on_circle(lv, 75)
+        random.shuffle(candidates)
+        for i in candidates:
+            # find first point that is closer
+            if i.get_distance_to(self._true_destination) < \
+                   lv.get_distance_to(self._true_destination):
+                self.destination = (i.x, i.y)
+                break
+
+    def move(self, time_passed_seconds):
+        super(Alien, self).move(time_passed_seconds, self.speed())
+        lv = Vector2(self.location.x, self.location.y)
+        dv = Vector2(self.destination)
+        if lv.get_distance_to(dv) < 2:
+            self._new_destination()
 
 class Bullet(GameObject):
     image = load_image("bullet.png")
