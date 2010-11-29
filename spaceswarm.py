@@ -192,35 +192,39 @@ class Bullet(GameObject):
         step = Vector2.from_points((WINDOWWIDTH/2,WINDOWHEIGHT/2),
                                    (dx,dy)) * 0.1
         while True:
-            if dx > WINDOWWIDTH or dy > WINDOWHEIGHT or dx < 1 or dy < 1:
-                dx += step.x; dy += step.y
+            if dx > WINDOWWIDTH or dy > WINDOWHEIGHT or dx < 0 or dy < 0:
                 break
-            dx += step.x; dy += step.y
+            dx += step.x
+            dy += step.y
 
         return (dx, dy)
 
-def new_level(level):
-    """
-    Creates various settings for a given level, e.g. spawn rate of aliens.
-    """
-    alien_speed = min(200, 100 + (level*5))
-    spawn_rate = max(15, 50 - (level*6))
-    if level < 4:
-        alien_multiplier = 1
-    elif level < 8:
-        alien_multiplier = 2
-        spawn_rate *= 2
-    elif level < 10:
-        alien_multiplier = 3
-        spawn_rate *= 3
-    elif level < 12:
-        alien_multiplier = 4
-        spawn_rate *= 3
-    elif level < 14:
-        alien_multiplier = 5
-        spawn_rate *= 3
-    remaining_aliens = 3 + (level*2)
-    return (spawn_rate, alien_speed, alien_multiplier, remaining_aliens)
+# Level definitions
+LEVELS = {
+    1: { 'aliens': [Alien(100) for x in range(4)],
+         'spawn_rate': 50, 'multiplier': 1 },
+    2: { 'aliens': [Alien(110) for x in range(6)],
+         'spawn_rate': 45, 'multiplier': 1 },
+    3: { 'aliens': [Alien(120) for x in range(9)],
+         'spawn_rate': 40, 'multiplier': 1 },
+    4: { 'aliens': [Alien(130) for x in range(12)],
+         'spawn_rate': 30, 'multiplier': 1 },
+    5: { 'aliens': [Alien(100) for x in range(10)],
+         'spawn_rate': 35, 'multiplier': 2 },
+    6: { 'aliens': [Alien(100) for x in range(16)],
+         'spawn_rate': 30, 'multiplier': 2 },
+    7: { 'aliens': [Alien(55) for x in range(21)],
+         'spawn_rate': 40, 'multiplier': 3 },
+    8: { 'aliens': [SmartAlien(120) for x in range(10)] +
+         [Alien(140) for x in range(10)],
+         'spawn_rate': 35, 'multiplier': 2 },
+    9: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(20)] +
+        [Alien(160) for x in range(10)],
+        'spawn_rate': 35, 'multiplier': 2 },
+    10: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(35)] +
+          [Alien(65) for x in range(25)],
+          'spawn_rate': 60, 'multiplier': 4 },
+    }
 
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
@@ -257,16 +261,14 @@ screen.blit(player_image, player)
 
 while True:
     # setup
-    game_over = False
+    game_over, game_finished = False, False
     aliens, bullets, explosions = [], [], []
     aliens.append(Alien())
     aliens_killed = 0
     alien_spawn_timer = 0
     score = 0
     level = 1
-    spawn_rate, alien_speed, \
-                alien_multiplier, \
-                remaining_aliens = new_level(level)
+    level_dict = LEVELS[level]
     pygame.mixer.music.play(-1, 0.0)
 
     while True: # Game loop
@@ -283,19 +285,18 @@ while True:
                 terminate()
 
         alien_spawn_timer += 1
-        if alien_spawn_timer == spawn_rate: # spawning time!
+        if alien_spawn_timer == level_dict['spawn_rate']: # spawning time!
             alien_spawn_timer = 0
-            if remaining_aliens:
-                for i in range(alien_multiplier):
-                    aliens.append(Alien())
-                    remaining_aliens -= 1
-                    if not remaining_aliens: break
+            if level_dict['aliens']:
+                for i in range(level_dict['multiplier']):
+                    aliens.append(level_dict['aliens'].pop())
+                    if not level_dict['aliens']: break
 
         time_passed = clock.tick(FPS)
         time_passed_seconds = clock.tick(FPS) / 1000.
 
         for a in aliens: # move all aliens closer towards player
-            a.move(time_passed_seconds, alien_speed)
+            a.move(time_passed_seconds)
             if player.colliderect(a.location):
                 game_over = True
                 break
@@ -311,21 +312,24 @@ while True:
                     alien_killed_sound.play()
                     aliens.remove(a)
                     explosions.append(Explosion(a.location))
-                    bullets.remove(b)
-                    if remaining_aliens == 0 and len(aliens) == 0:
+                    if b in bullets: bullets.remove(b)
+                    if len(level_dict['aliens']) == 0 and len(aliens) == 0:
                         levelup_sound.play()
                         level += 1
-                        spawn_rate, alien_speed, alien_multiplier, \
-                                    remaining_aliens = new_level(level)
-                        alien_spawn_timer = 0
+                        if not level in LEVELS.keys():
+                            game_finished = True
+                        else:
+                            level_dict = LEVELS[level]
+                            alien_spawn_timer = 0
 
-            if not screen.get_rect().contains(b.location):
+            if not screen.get_rect().contains(b.location) and b in bullets:
                 bullets.remove(b)
 
+        if game_finished: break
         # Redraw screen
         screen.blit(bg, (0,0))
         draw_text('Level: %s' % (level), font, screen, 0, 0)
-        draw_text('Remaining aliens: %s' % (remaining_aliens),
+        draw_text('Remaining aliens: %s' % (len(level_dict['aliens'])),
                  font, screen, 0, 20)
         draw_text('Aliens killed: %s' % (aliens_killed),
                  font, screen, WINDOWWIDTH/2, 0)
@@ -342,12 +346,21 @@ while True:
         screen.blit(scope_image, pygame.mouse.get_pos())
         pygame.display.update()
 
-    # broken out of game loop, show game over screen
+    # broken out of game loop
     pygame.mixer.music.stop()
-    game_over_sound.play()
-    draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
-             (WINDOWHEIGHT / 3), RED)
-    draw_text('Press any key to play again, or Esc to quit.', font,
+    if game_over:
+        game_over_sound.play()
+        draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
+                 (WINDOWHEIGHT / 3), RED)
+        draw_text('Press any key to play again, or Esc to quit.', font,
              screen, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 50)
+    else:
+        # TODO game won sound
+        draw_text('CONGRATULATIONS!', title_font, screen,
+                  (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3), BLUE)
+        draw_text('You have saved Earth!', title_font, screen,
+                  (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3) + 100, GREEN)
+        draw_text('Press any key to play again, or Esc to quit.', font,
+             screen, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 150)
     pygame.display.update()
     wait_for_player()
