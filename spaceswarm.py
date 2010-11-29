@@ -11,7 +11,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-WINDOWWIDTH, WINDOWHEIGHT = 600, 600
+WINDOWWIDTH, WINDOWHEIGHT = 800, 600
 TEXTCOLOR = WHITE
 BACKGROUNDCOLOR = BLACK
 FPS = 40
@@ -145,7 +145,7 @@ class Bullet(GameObject):
         step = Vector2.from_points((WINDOWWIDTH/2,WINDOWHEIGHT/2),
                                    (dx,dy)) * 0.1
         while True:
-            if dx > 600 or dy > 600 or dx < 1 or dy < 1:
+            if dx > WINDOWWIDTH or dy > WINDOWHEIGHT or dx < 1 or dy < 1:
                 break
             dx += step.x
             dy += step.y
@@ -194,12 +194,11 @@ pygame.mixer.music.load("data/background.mid")
 
 # show the "Start" screen
 screen.blit(bg, (0,0))
-draw_text('Space Swarm!', title_font, screen, (WINDOWWIDTH / 3),
-         (WINDOWHEIGHT / 5), RED)
+draw_text('Space Swarm!', title_font, screen, 20,
+         20, RED)
 draw_text('To defend Earth, fend off the aliens with your missiles.',
-         font, screen, 10, (WINDOWHEIGHT / 5) + 50)
-draw_text('Press any key to start.', font, screen,
-         (WINDOWWIDTH / 3) - 30, (WINDOWHEIGHT / 5) + 100)
+         font, screen, 20, 60)
+draw_text('Press any key to start.', font, screen, 20, 90)
 pygame.display.update()
 wait_for_player()
 
