@@ -53,6 +53,16 @@ def wait_for_player():
                     terminate()
                 return
 
+def get_n_points_on_circle(center, radius, n=10):
+    alpha = math.pi * 2. / n
+    points = list(range(n))
+    for i in points:
+        theta = alpha * i
+        point_on_circle = Vector2(math.cos(theta) * radius,
+                                  math.sin(theta) * radius)
+        points[i] = center + point_on_circle
+    return points
+
 def draw_text(text, font, surface, x, y, color=TEXTCOLOR):
     text = font.render(text, 1, color)
     rect = text.get_rect()
