@@ -175,18 +175,6 @@ def new_level(level):
     remaining_aliens = 3 + (level*2)
     return (spawn_rate, alien_speed, alien_multiplier, remaining_aliens)
 
-def move(obj, time_passed_secords, speed):
-    """
-
-    """
-    destination = Vector2(obj['dx'], obj['dy'])
-    position = Vector2(obj['rect'].x, obj['rect'].y)
-    heading = Vector2.from_points(position, destination)
-    heading.normalize()
-    position += heading * time_passed_seconds * speed
-    obj['rect'].x = position.x
-    obj['rect'].y = position.y
-
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
 bullet_speed = 400
