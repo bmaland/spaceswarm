@@ -5,6 +5,8 @@ import pygame
 from vector2 import Vector2
 from pygame.locals import *
 
+SPACESWARM_VERSION = (0, 1, 0)
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -199,6 +201,8 @@ draw_text('Space Swarm!', title_font, screen, 20,
 draw_text('To defend Earth, fend off the aliens with your missiles.',
          font, screen, 20, 60)
 draw_text('Press any key to start.', font, screen, 20, 90)
+draw_text("v"+".".join([str(x) for x in SPACESWARM_VERSION]), font, screen,
+          20, WINDOWHEIGHT-40)
 pygame.display.update()
 wait_for_player()
 
