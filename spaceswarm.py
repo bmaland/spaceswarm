@@ -201,29 +201,29 @@ class Bullet(GameObject):
 
 # Level definitions
 LEVELS = {
-    1: { 'aliens': [Alien(100) for x in range(4)],
+    1: { 'aliens': [Alien(110) for x in range(4)],
          'spawn_rate': 50, 'multiplier': 1 },
-    2: { 'aliens': [Alien(110) for x in range(6)],
+    2: { 'aliens': [Alien(115) for x in range(6)],
          'spawn_rate': 45, 'multiplier': 1 },
-    3: { 'aliens': [Alien(120) for x in range(9)],
+    3: { 'aliens': [Alien(125) for x in range(10)],
          'spawn_rate': 40, 'multiplier': 1 },
-    4: { 'aliens': [Alien(130) for x in range(12)],
+    4: { 'aliens': [Alien(135) for x in range(14)],
          'spawn_rate': 30, 'multiplier': 1 },
-    5: { 'aliens': [Alien(100) for x in range(10)],
-         'spawn_rate': 35, 'multiplier': 2 },
-    6: { 'aliens': [Alien(100) for x in range(16)],
+    5: { 'aliens': [Alien(100) for x in range(14)],
+         'spawn_rate': 25, 'multiplier': 2 },
+    6: { 'aliens': [Alien(100) for x in range(20)],
          'spawn_rate': 30, 'multiplier': 2 },
-    7: { 'aliens': [Alien(55) for x in range(21)],
+    7: { 'aliens': [Alien(60) for x in range(26)],
          'spawn_rate': 40, 'multiplier': 3 },
     8: { 'aliens': [SmartAlien(120) for x in range(10)] +
-         [Alien(140) for x in range(10)],
-         'spawn_rate': 35, 'multiplier': 2 },
+         [Alien(155) for x in range(10)],
+         'spawn_rate': 30, 'multiplier': 2 },
     9: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(20)] +
         [Alien(160) for x in range(10)],
         'spawn_rate': 35, 'multiplier': 2 },
-    10: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(35)] +
-          [Alien(65) for x in range(25)],
-          'spawn_rate': 60, 'multiplier': 4 },
+    10: { 'aliens': [SmartAlien(random.randint(100,160)) for x in range(40)] +
+          [Alien(65) for x in range(30)],
+          'spawn_rate': 55, 'multiplier': 4 },
     }
 
 bg = load_image("bg.jpg")
