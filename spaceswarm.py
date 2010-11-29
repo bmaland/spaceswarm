@@ -243,7 +243,7 @@ weapon_sound = load_sound("weapon.wav")
 alien_killed_sound = load_sound("alienkilled.wav")
 game_over_sound = load_sound("gameover.wav")
 levelup_sound = load_sound("levelup.wav")
-pygame.mixer.music.load("data/background.mid")
+pygame.mixer.music.load(os.path.join("data", "background.mid"))
 
 # show the "Start" screen
 screen.blit(bg, (0,0))
