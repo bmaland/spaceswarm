@@ -78,7 +78,7 @@ class GameObject(object):
     def render(self, surface):
         surface.blit(self._image, self.location)
 
-    def move(self, time_passed_secords, speed):
+    def move(self, time_passed_seconds, speed):
         dv = Vector2(self.destination)
         lv = Vector2(self.location.x, self.location.y)
         heading = Vector2.from_points(lv, dv)
@@ -88,10 +88,10 @@ class GameObject(object):
         self.location.y = new_position.y
 
 class Explosion(GameObject):
-    ExplosionImage = load_image("explosion.png")
+    image = load_image("explosion.png")
 
     def __init__(self, location):
-        GameObject.__init__(self, Explosion.ExplosionImage, location)
+        GameObject.__init__(self, Explosion.image, location)
         self._ttl = 5 # number of frames explosion should be visible
 
     def move(self):
