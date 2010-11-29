@@ -4,7 +4,7 @@ import random, os, sys, time, math, pygame
 from vector2 import Vector2
 from pygame.locals import *
 
-SPACESWARM_VERSION = (0, 2, 0)
+SPACESWARM_VERSION = (0, 2, 1)
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
