@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import random, os, sys, time
-import pygame
+import random, os, sys, time, math, pygame
 from vector2 import Vector2
 from pygame.locals import *
 
