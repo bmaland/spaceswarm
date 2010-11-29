@@ -200,30 +200,32 @@ class Bullet(GameObject):
         return (dx, dy)
 
 # Level definitions
-LEVELS = {
-    1: { 'aliens': [Alien(110) for x in range(4)],
+# TODO refactor all the level logic into a class
+def instanciate_levels():
+    return {
+        1: { 'aliens': [Alien(110) for x in range(4)],
          'spawn_rate': 50, 'multiplier': 1 },
-    2: { 'aliens': [Alien(115) for x in range(6)],
-         'spawn_rate': 45, 'multiplier': 1 },
-    3: { 'aliens': [Alien(125) for x in range(10)],
-         'spawn_rate': 40, 'multiplier': 1 },
-    4: { 'aliens': [Alien(135) for x in range(14)],
-         'spawn_rate': 30, 'multiplier': 1 },
-    5: { 'aliens': [Alien(100) for x in range(14)],
-         'spawn_rate': 25, 'multiplier': 2 },
-    6: { 'aliens': [Alien(100) for x in range(20)],
-         'spawn_rate': 30, 'multiplier': 2 },
-    7: { 'aliens': [Alien(60) for x in range(26)],
-         'spawn_rate': 40, 'multiplier': 3 },
-    8: { 'aliens': [SmartAlien(120) for x in range(10)] +
-         [Alien(155) for x in range(10)],
-         'spawn_rate': 30, 'multiplier': 2 },
-    9: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(20)] +
-        [Alien(160) for x in range(10)],
-        'spawn_rate': 35, 'multiplier': 2 },
-    10: { 'aliens': [SmartAlien(random.randint(100,160)) for x in range(40)] +
-          [Alien(65) for x in range(30)],
-          'spawn_rate': 55, 'multiplier': 4 },
+        2: { 'aliens': [Alien(115) for x in range(6)],
+             'spawn_rate': 45, 'multiplier': 1 },
+        3: { 'aliens': [Alien(125) for x in range(10)],
+             'spawn_rate': 40, 'multiplier': 1 },
+        4: { 'aliens': [Alien(135) for x in range(14)],
+             'spawn_rate': 30, 'multiplier': 1 },
+        5: { 'aliens': [Alien(100) for x in range(14)],
+             'spawn_rate': 25, 'multiplier': 2 },
+        6: { 'aliens': [Alien(100) for x in range(20)],
+             'spawn_rate': 30, 'multiplier': 2 },
+        7: { 'aliens': [Alien(60) for x in range(26)],
+             'spawn_rate': 40, 'multiplier': 3 },
+        8: { 'aliens': [SmartAlien(120) for x in range(10)] +
+             [Alien(155) for x in range(10)],
+             'spawn_rate': 30, 'multiplier': 2 },
+        9: { 'aliens': [SmartAlien(random.randint(90,140)) for x in range(20)] +
+            [Alien(160) for x in range(10)],
+            'spawn_rate': 35, 'multiplier': 2 },
+        10: { 'aliens': [SmartAlien(random.randint(100,160)) for x in range(40)] +
+              [Alien(65) for x in range(30)],
+              'spawn_rate': 55, 'multiplier': 4 },
     }
 
 bg = load_image("bg.jpg")
@@ -268,7 +270,8 @@ while True:
     alien_spawn_timer = 0
     score = 0
     level = 1
-    level_dict = LEVELS[level]
+    levels = instanciate_levels()
+    level_dict = levels[level]
     pygame.mixer.music.play(-1, 0.0)
 
     while True: # Game loop
@@ -316,10 +319,10 @@ while True:
                     if len(level_dict['aliens']) == 0 and len(aliens) == 0:
                         levelup_sound.play()
                         level += 1
-                        if not level in LEVELS.keys():
+                        if not level in levels.keys():
                             game_finished = True
                         else:
-                            level_dict = LEVELS[level]
+                            level_dict = levels[level]
                             alien_spawn_timer = 0
 
             if not screen.get_rect().contains(b.location) and b in bullets:
