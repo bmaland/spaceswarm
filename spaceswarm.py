@@ -148,9 +148,9 @@ class Bullet(GameObject):
                                    (dx,dy)) * 0.1
         while True:
             if dx > WINDOWWIDTH or dy > WINDOWHEIGHT or dx < 1 or dy < 1:
+                dx += step.x; dy += step.y
                 break
-            dx += step.x
-            dy += step.y
+            dx += step.x; dy += step.y
 
         return (dx, dy)
 
