@@ -280,8 +280,10 @@ while True:
                 if score < 0: score = 0
                 bullets.append(Bullet(pygame.mouse.get_pos()))
             elif event.type is KEYDOWN:
-                if event.key == K_ESCAPE:
+                if event.key == K_ESCAPE or event.key == K_q:
                     terminate()
+                elif event.key == K_p:
+                    wait_for_player()
             elif event.type is QUIT:
                 terminate()
 
