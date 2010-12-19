@@ -257,15 +257,13 @@ draw_text("v"+".".join([str(x) for x in SPACESWARM_VERSION]), font, screen,
 pygame.display.update()
 wait_for_player()
 
-# Place player in origo
-player = pygame.Rect(WINDOWWIDTH / 2, WINDOWHEIGHT / 2, 50, 50)
+player = pygame.Rect((WINDOWWIDTH / 2)-25, (WINDOWHEIGHT / 2)-25, 50, 50)
 screen.blit(player_image, player)
 
 while True:
     # setup
     game_over, game_finished = False, False
     aliens, bullets, explosions = [], [], []
-    aliens.append(Alien())
     aliens_killed = 0
     alien_spawn_timer = 0
     score = 0
