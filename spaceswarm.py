@@ -30,7 +30,7 @@ def load_image(name):
         image = image.convert()
     else:
         image = image.convert_alpha()
-    return image
+    return image, image.get_rect()
 
 def load_sound(name):
     class NoneSound:
@@ -69,14 +69,15 @@ def draw_text(text, font, surface, x, y, color=TEXTCOLOR):
     rect.topleft = (x, y)
     surface.blit(text, rect)
 
-class GameObject(object):
+class GameObject(pygame.sprite.Sprite):
     def __init__(self, image, location, destination=None):
-        self._image = image
+        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.image, self.rect = image
         self.location = location
         self.destination = destination
 
     def render(self, surface):
-        surface.blit(self._image, self.location)
+        surface.blit(self.image, self.location)
 
     def move(self, time_passed_seconds, speed):
         dv = Vector2(self.destination)
@@ -106,7 +107,7 @@ class Explosion(GameObject):
 
 class Alien(GameObject):
     image = load_image("alien.png")
-    width, height = image.get_size()
+    width, height = image[0].get_size()
 
     def __init__(self, speed=100, img=None):
         if img is None: img = Alien.image
@@ -146,7 +147,7 @@ class Alien(GameObject):
 
 class SmartAlien(Alien):
     image = load_image("smart_alien.png")
-    width, height = image.get_size()
+    width, height = image[0].get_size()
 
     def __init__(self, speed=100):
         Alien.__init__(self, speed, SmartAlien.image)
@@ -173,7 +174,7 @@ class SmartAlien(Alien):
 
 class Bullet(GameObject):
     image = load_image("bullet.png")
-    width, height = image.get_size()
+    width, height = image[0].get_size()
 
     def __init__(self, location):
         GameObject.__init__(self, Bullet.image,
@@ -237,8 +238,8 @@ title_font = pygame.font.SysFont(None, 48)
 font = pygame.font.SysFont(None, 32)
 
 # Load resources
-player_image = load_image("player.png")
-scope_image = load_image("scope.png")
+player_image = load_image("player.png")[0]
+scope_image = load_image("scope.png")[0]
 weapon_sound = load_sound("weapon.wav")
 alien_killed_sound = load_sound("alienkilled.wav")
 game_over_sound = load_sound("gameover.wav")
@@ -246,7 +247,7 @@ levelup_sound = load_sound("levelup.wav")
 pygame.mixer.music.load(os.path.join("data", "background.mid"))
 
 # show the "Start" screen
-screen.blit(bg, (0,0))
+screen.blit(*bg)
 draw_text('Space Swarm!', title_font, screen, 20,
          20, RED)
 draw_text('To defend Earth, fend off the aliens with your missiles.',
@@ -337,7 +338,7 @@ while True:
 
         if game_finished: break
         # Redraw screen
-        screen.blit(bg, (0,0))
+        screen.blit(*bg)
         draw_text('Level: %s' % (level), font, screen, 0, 0)
         draw_text('Remaining aliens: %s' % (len(level_dict['aliens'])),
                  font, screen, 0, 20)
