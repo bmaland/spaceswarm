@@ -2,14 +2,18 @@
 
 A simple arcade game created with pygame.
 
+Keys:
+
+Mouse to aim/shoot, P for pause, Q for quit, M for mute.
+
 For code, issues, or suggestions for improvement, visit the project site at
 http://github.com/bmaland/spaceswarm
 
 # Instructions
 
-Tested with Python 2.6.6. Should work with 2.7.x, not sure about 3.x. The only
+Tested with Python 2.5 and 2.6. Should work with 2.7. Untested on 3.x. The only
 dependency except Python is pygame. Install it through your package manager, or
-download from http://pygame.org/download.shtml. Only tested with version 1.9.1,
+download from http://pygame.org/download.shtml. Only tested with pygame 1.9.1,
 but older releases might also work. Next, simply run spaceswarm.py. Have fun!
 
 ## Mac OS X
