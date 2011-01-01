@@ -262,7 +262,7 @@ screen.blit(player_image, player)
 
 while True:
     # setup
-    game_over, game_finished = False, False
+    game_over, game_finished, muted = False, False, False
     aliens, bullets, explosions = [], [], []
     aliens_killed = 0
     alien_spawn_timer = 0
@@ -275,7 +275,7 @@ while True:
     while True: # Game loop
         for event in pygame.event.get():
             if event.type is MOUSEBUTTONDOWN: # weapon fired
-                weapon_sound.play()
+                if not muted: weapon_sound.play()
                 score -= 5 * level # each bullet costs score
                 if score < 0: score = 0
                 bullets.append(Bullet(pygame.mouse.get_pos()))
@@ -284,6 +284,13 @@ while True:
                     terminate()
                 elif event.key == K_p:
                     wait_for_player()
+                elif event.key == K_m:
+                    if muted:
+                        pygame.mixer.music.unpause()
+                        muted = False
+                    else:
+                        pygame.mixer.music.pause()
+                        muted = True
             elif event.type is QUIT:
                 terminate()
 
@@ -312,12 +319,12 @@ while True:
                 if b.location.colliderect(a.location): # alien shot down!
                     aliens_killed += 1
                     score += 10 * level # increase kill score as we progress
-                    alien_killed_sound.play()
+                    if not muted: alien_killed_sound.play()
                     aliens.remove(a)
                     explosions.append(Explosion(a.location))
                     if b in bullets: bullets.remove(b)
                     if len(level_dict['aliens']) == 0 and len(aliens) == 0:
-                        levelup_sound.play()
+                        if not muted: levelup_sound.play()
                         level += 1
                         if not level in levels.keys():
                             game_finished = True
@@ -352,7 +359,7 @@ while True:
     # broken out of game loop
     pygame.mixer.music.stop()
     if game_over:
-        game_over_sound.play()
+        if not muted: game_over_sound.play()
         draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
                  (WINDOWHEIGHT / 3), RED)
         draw_text('Press any key to play again, or Esc to quit.', font,
