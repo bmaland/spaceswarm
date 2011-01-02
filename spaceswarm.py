@@ -88,7 +88,8 @@ class Player(GameObject):
     image = load_image("player.png")
 
     def __init__(self):
-        rect = pygame.Rect((WINDOWWIDTH / 2)-25, (WINDOWHEIGHT / 2)-25, 50, 50)
+        rect = Player.image[1]
+        rect.center = (WINDOWWIDTH / 2, WINDOWHEIGHT / 2)
         GameObject.__init__(self, Player.image, rect)
 
     def update(self, time_passed):
