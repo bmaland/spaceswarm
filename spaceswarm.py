@@ -94,16 +94,14 @@ class Explosion(GameObject):
     def __init__(self, location):
         GameObject.__init__(self, Explosion.image, location)
         self._ttl = 5 # number of frames explosion should be visible
+        self.rect = location
 
     def move(self):
-        raise
+        pass
 
-    def render(self, surface):
-        super(Explosion, self).render(surface)
+    def update(self):
         self._ttl -= 1
-
-    def is_finished(self):
-        return self._ttl == 0
+        if self._ttl == 0: self.kill()
 
 class Alien(GameObject):
     image = load_image("alien.png")
@@ -264,7 +262,8 @@ screen.blit(player_image, player)
 while True:
     # setup
     game_over, game_finished, muted = False, False, False
-    aliens, bullets, explosions = [], [], []
+    aliens, bullets = [], []
+    explosions = pygame.sprite.Group()
     aliens_killed = 0
     alien_spawn_timer = 0
     score = 0
@@ -303,9 +302,8 @@ while True:
                     aliens.append(level_dict['aliens'].pop())
                     if not level_dict['aliens']: break
 
-        time_passed = clock.tick(FPS)
-        time_passed_seconds = clock.tick(FPS) / 1000.
-
+        time_passed = clock.tick(FPS) # 25/26
+        time_passed_seconds = clock.tick(FPS) / 1000. # 0.025/0.026
         for a in aliens: # move all aliens closer towards player
             a.move(time_passed_seconds)
             if player.colliderect(a.location):
@@ -322,7 +320,7 @@ while True:
                     score += 10 * level # increase kill score as we progress
                     if not muted: alien_killed_sound.play()
                     aliens.remove(a)
-                    explosions.append(Explosion(a.location))
+                    explosions.add(Explosion(a.location))
                     if b in bullets: bullets.remove(b)
                     if len(level_dict['aliens']) == 0 and len(aliens) == 0:
                         if not muted: levelup_sound.play()
@@ -348,11 +346,9 @@ while True:
 
         for b in bullets: b.render(screen)
         for a in aliens: a.render(screen)
-        for e in explosions:
-            if e.is_finished():
-                explosions.remove(e)
-            else:
-                e.render(screen)
+
+        explosions.update()
+        explosions.draw(screen)
         screen.blit(player_image, player)
         screen.blit(scope_image, pygame.mouse.get_pos())
         pygame.display.update()
