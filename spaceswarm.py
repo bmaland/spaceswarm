@@ -323,7 +323,7 @@ while True:
             game_over = True
             break
 
-        for a in pygame.sprite.groupcollide(bullets, aliens, 1, 1).keys():
+        for a in pygame.sprite.groupcollide(aliens, bullets, 1, 1).keys():
             Explosion(a.rect)
             a.kill()
             aliens_killed += 1
