@@ -175,6 +175,7 @@ class SmartAlien(Alien):
 class Bullet(GameObject):
     image = load_image("bullet.png")
     width, height = image[0].get_size()
+    speed = 400
 
     def __init__(self, location):
         GameObject.__init__(self, Bullet.image,
@@ -231,7 +232,6 @@ def instanciate_levels():
 
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
-bullet_speed = 400
 
 # Fonts
 title_font = pygame.font.SysFont(None, 48)
@@ -314,7 +314,7 @@ while True:
         if game_over: break
 
         for b in bullets:
-            b.move(time_passed_seconds, bullet_speed)
+            b.move(time_passed_seconds, Bullet.speed)
 
             for a in aliens:
                 if b.location.colliderect(a.location): # alien shot down!
