@@ -35,7 +35,7 @@ def load_image(name):
 def load_sound(name):
     class NoneSound:
         def play(self): pass
-    if not pygame.mixer: return NoneSound()
+    if not pygame.mixer.get_init(): return NoneSound()
     fullname=os.path.join('data', name)
     return pygame.mixer.Sound(fullname)
 
@@ -253,7 +253,8 @@ weapon_sound = load_sound("weapon.wav")
 alien_killed_sound = load_sound("alienkilled.wav")
 game_over_sound = load_sound("gameover.wav")
 levelup_sound = load_sound("levelup.wav")
-pygame.mixer.music.load(os.path.join("data", "background.mid"))
+if pygame.mixer.get_init():
+    pygame.mixer.music.load(os.path.join("data", "background.mid"))
 
 # show the "Start" screen
 screen.blit(*bg)
@@ -285,7 +286,7 @@ while True:
     level = 1
     levels = instanciate_levels()
     level_dict = levels[level]
-    pygame.mixer.music.play(-1, 0.0)
+    if pygame.mixer.get_init(): pygame.mixer.music.play(-1, 0.0)
 
     player = Player()
 
