@@ -216,29 +216,79 @@ class Spawner(object):
 
     def spawn(self):
         self.n -= 1
+        if type(self.speed) == tuple:
+            return self.klass(random.randint(self.speed[0], self.speed[1]))
         return self.klass(self.speed)
 
-# Level definitions
-# TODO refactor all the level logic into a class
-def instanciate_levels():
-    return {
-        1: { 'aliens': Spawner(Alien, 50, 4),
-         'spawn_rate': 50, 'multiplier': 1 },
-        2: { 'aliens': Spawner(Alien, 55, 6),
-             'spawn_rate': 45, 'multiplier': 1 },
-        3: { 'aliens': Spawner(Alien, 62, 10),
-             'spawn_rate': 40, 'multiplier': 1 },
-        4: { 'aliens': Spawner(Alien, 67, 14),
-             'spawn_rate': 30, 'multiplier': 1 },
-        5: { 'aliens': Spawner(Alien, 50, 14),
-             'spawn_rate': 25, 'multiplier': 2 },
-        6: { 'aliens': Spawner(Alien, 50, 20),
-             'spawn_rate': 30, 'multiplier': 2 },
-        7: { 'aliens': Spawner(Alien, 30, 26),
-             'spawn_rate': 40, 'multiplier': 3 },
-        8: { 'aliens': Spawner(SmartAlien, 60, 20),
-             'spawn_rate': 30, 'multiplier': 2 }
-    }
+    def empty(self):
+        self.n == 0
+
+class LevelController(object):
+    def __init__(self):
+        self.spawn_timer = 0
+        self.level = 1
+        self.levels = self.instanciate_levels()
+
+    def is_game_finished(self):
+        return not self.level + 1 in self.levels.keys()
+
+    def level_up(self):
+        self.spawn_timer = 0
+        self.level += 1
+
+    def is_spawn_time(self):
+        return self.current_level()['spawn_rate'] == self.spawn_timer and \
+               self.current_spawner().n > 0
+
+    def current_spawner(self):
+        # FIXME this is horrible
+        aliens = self.current_level()['aliens']
+        if type(aliens) == list:
+            if aliens[0].n > 0:
+                return aliens[0]
+            else:
+                return aliens[1]
+        return aliens
+
+    def tick(self):
+        self.spawn_timer += 1
+        if self.is_spawn_time():
+            self.spawn()
+            self.spawn_timer = 0
+
+    def spawn(self):
+        for i in range(self.current_level()['multiplier']):
+            self.current_spawner().spawn()
+
+    def current_level(self):
+        return self.levels[self.level]
+
+    def instanciate_levels(self):
+        return {
+            1: { 'aliens': Spawner(Alien, 55, 8),
+             'spawn_rate': 90, 'multiplier': 1 },
+            2: { 'aliens': Spawner(Alien, 60, 12),
+                 'spawn_rate': 80, 'multiplier': 1 },
+            3: { 'aliens': Spawner(Alien, 65, 14),
+                 'spawn_rate': 40, 'multiplier': 1 },
+            4: { 'aliens': Spawner(Alien, 70, 16),
+                 'spawn_rate': 40, 'multiplier': 1 },
+            5: { 'aliens': Spawner(Alien, 45, 18),
+                 'spawn_rate': 35, 'multiplier': 2 },
+            6: { 'aliens': Spawner(Alien, 50, 20),
+                 'spawn_rate': 40, 'multiplier': 2 },
+            7: { 'aliens': Spawner(Alien, 30, 27),
+                 'spawn_rate': 80, 'multiplier': 3 },
+            8: { 'aliens': [Spawner(SmartAlien, 60, 20),
+                            Spawner(Alien, 120, 10)],
+                 'spawn_rate': 70, 'multiplier': 2 },
+            9: { 'aliens': [Spawner(SmartAlien, (45, 70), 20),
+                            Spawner(Alien, 80, 10)],
+                 'spawn_rate': 60, 'multiplier': 2},
+            10: { 'aliens': [Spawner(SmartAlien, (50, 80), 42),
+                             Spawner(Alien, 35, 30)],
+                  'spawn_rate': 60, 'multiplier': 4 },
+        }
 
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
@@ -281,11 +331,8 @@ while True:
     Explosion.containers = allsprites
 
     aliens_killed = 0
-    alien_spawn_timer = 0
     score = 0
-    level = 1
-    levels = instanciate_levels()
-    level_dict = levels[level]
+    level_controller = LevelController()
     if pygame.mixer.get_init(): pygame.mixer.music.play(-1, 0.0)
 
     player = Player()
@@ -294,11 +341,13 @@ while True:
         for event in pygame.event.get():
             if event.type is MOUSEBUTTONDOWN: # weapon fired
                 if not muted: weapon_sound.play()
-                score -= 5 * level # each bullet costs score
+                score -= 5 * level_controller.level # each bullet costs score
                 if score < 0: score = 0
                 Bullet(pygame.mouse.get_pos())
             elif event.type is KEYDOWN:
-                if event.key == K_ESCAPE or event.key == K_q:
+                if event.key == K_SPACE:
+                    for a in aliens: a.kill()
+                elif event.key == K_ESCAPE or event.key == K_q:
                     terminate()
                 elif event.key == K_p:
                     wait_for_player()
@@ -312,13 +361,7 @@ while True:
             elif event.type is QUIT:
                 terminate()
 
-        alien_spawn_timer += 1
-        if alien_spawn_timer == level_dict['spawn_rate'] and \
-               level_dict['aliens'].n > 0:
-            alien_spawn_timer = 0
-            for i in range(level_dict['multiplier']):
-                level_dict['aliens'].spawn()
-                if level_dict['aliens'].n == 0: break
+        level_controller.tick() # spawns new aliens
 
         # collision detection
         if pygame.sprite.spritecollide(player, aliens, 1):
@@ -329,24 +372,21 @@ while True:
             Explosion(a.rect)
             a.kill()
             aliens_killed += 1
-            score += 10 * level
+            score += 10 * level_controller.level
             if not muted: alien_killed_sound.play()
 
-        if level_dict['aliens'].n == 0 and len(aliens) == 0:
+        # FIXME
+        if level_controller.current_spawner().n == 0 and len(aliens) == 0:
             if not muted: levelup_sound.play()
-            level += 1
-            if not level in levels.keys():
+            if level_controller.is_game_finished():
                 game_finished = True
                 break
             else:
-                level_dict = levels[level]
-                alien_spawn_timer = 0
+                level_controller.level_up()
 
         # Redraw screen
         screen.blit(*bg)
-        draw_text('Level: %s' % (level), font, screen, 0, 0)
-        draw_text('Remaining aliens: %s' % (level_dict['aliens'].n),
-                 font, screen, 0, 20)
+        draw_text('Level: %s' % (level_controller.level), font, screen, 0, 0)
         draw_text('Aliens killed: %s' % (aliens_killed),
                  font, screen, WINDOWWIDTH/2, 0)
         draw_text('Score: %s' % (score), font, screen, WINDOWWIDTH/2, 20)
