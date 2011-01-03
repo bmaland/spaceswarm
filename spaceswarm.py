@@ -357,7 +357,7 @@ while True:
         pygame.display.update()
 
     # broken out of game loop
-    pygame.mixer.music.stop()
+    if pygame.mixer.get_init(): pygame.mixer.music.stop()
     if game_over:
         if not muted: game_over_sound.play()
         draw_text('GAME OVER', title_font, screen, (WINDOWWIDTH / 3),
