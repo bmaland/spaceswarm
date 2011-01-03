@@ -167,7 +167,7 @@ class SmartAlien(Alien):
                 break
 
     def update(self, time_passed):
-        super(Alien, self).update(time_passed)
+        super(SmartAlien, self).update(time_passed)
         lv = Vector2(self.rect.x, self.rect.y)
         dv = Vector2(self.destination)
         if lv.get_distance_to(dv) < 2:
