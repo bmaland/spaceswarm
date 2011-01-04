@@ -141,10 +141,41 @@ class Alien(GameObject):
             x = 0
             y = random.randint(0, WINDOWHEIGHT)
 
-        return pygame.Rect(x, y, Alien.width, Alien.height)
+        return pygame.Rect(x, y, type(self).width, type(self).height)
 
     def update(self, time_passed):
         super(Alien, self).move(time_passed, self.speed())
+
+class TinyAlien(Alien):
+    image = (pygame.transform.scale(load_image("alien.png")[0], (25,25)),)
+    width, height = image[0].get_size()
+
+    def __init__(self, speed=100):
+        Alien.__init__(self, speed, TinyAlien.image)
+
+class ChangelingAlien(Alien):
+    def __init__(self, speed=100):
+        Alien.__init__(self, speed, Alien.image)
+        self._orig_speed = speed
+        self._change_timer = 25
+
+    def update(self, time_passed):
+        super(ChangelingAlien, self).update(time_passed)
+        self._change_timer -= 1
+        if self._change_timer == 0:
+            self._change_timer = 25
+            if random.randint(0,4) == 0: # 20% chance for speed change
+                self._speed = random.randint(0, self._orig_speed+20)
+            if random.randint(0,19) == 0: # 5% chance for shape change
+                if self.rect.width == Alien.width:
+                    self.image = TinyAlien.image[0]
+                    self.rect = pygame.Rect(self.rect.x, self.rect.y,
+                                            TinyAlien.width, TinyAlien.height)
+                else:
+                    self.image = Alien.image[0]
+                    self.rect = pygame.Rect(self.rect.x, self.rect.y,
+                                            Alien.width, Alien.height)
+
 
 class SmartAlien(Alien):
     image = load_image("smart_alien.png")
