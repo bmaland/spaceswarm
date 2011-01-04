@@ -324,14 +324,16 @@ while True:
     aliens = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
     allsprites = pygame.sprite.RenderUpdates()
+    aliens_killed = 0
+    firepower = 50
+    shots = 0
+    accuracy = 0
 
     Player.containers = allsprites
     Alien.containers = aliens, allsprites
     Bullet.containers = bullets, allsprites
     Explosion.containers = allsprites
 
-    aliens_killed = 0
-    score = 0
     level_controller = LevelController()
     if pygame.mixer.get_init(): pygame.mixer.music.play(-1, 0.0)
 
@@ -340,13 +342,17 @@ while True:
     while True: # Game loop
         for event in pygame.event.get():
             if event.type is MOUSEBUTTONDOWN: # weapon fired
-                if not muted: weapon_sound.play()
-                score -= 5 * level_controller.level # each bullet costs score
-                if score < 0: score = 0
-                Bullet(pygame.mouse.get_pos())
+                if firepower > 10:
+                    if not muted: weapon_sound.play()
+                    firepower -= 10
+                    Bullet(pygame.mouse.get_pos())
+                    shots += 1
             elif event.type is KEYDOWN:
                 if event.key == K_SPACE:
-                    for a in aliens: a.kill()
+                    if firepower > 500:
+                        firepower -= 400
+                        aliens_killed += len(aliens)
+                        for a in aliens: a.kill()
                 elif event.key == K_ESCAPE or event.key == K_q:
                     terminate()
                 elif event.key == K_p:
@@ -361,6 +367,11 @@ while True:
             elif event.type is QUIT:
                 terminate()
 
+        if firepower < 50:
+            firepower += 0.3
+        else:
+            firepower += min(0.2, firepower/1000.0)
+
         level_controller.tick() # spawns new aliens
 
         # collision detection
@@ -368,16 +379,22 @@ while True:
             game_over = True
             break
 
+        # TODO ma finna ut firepower mechanics, koss ska den oka
         for a in pygame.sprite.groupcollide(aliens, bullets, 1, 1).keys():
             Explosion(a.rect)
             a.kill()
             aliens_killed += 1
-            score += 10 * level_controller.level
+            accuracy = int(round((float(aliens_killed)/shots)*100))
+            if isinstance(a, SmartAlien):
+                firepower += 15
+            else:
+                firepower += 7.5 # regular alien
             if not muted: alien_killed_sound.play()
 
         # FIXME
         if level_controller.current_spawner().n == 0 and len(aliens) == 0:
             if not muted: levelup_sound.play()
+            firepower += 10
             if level_controller.is_game_finished():
                 game_finished = True
                 break
@@ -386,10 +403,11 @@ while True:
 
         # Redraw screen
         screen.blit(*bg)
-        draw_text('Level: %s' % (level_controller.level), font, screen, 0, 0)
-        draw_text('Aliens killed: %s' % (aliens_killed),
+        draw_text('Level: %s' % level_controller.level, font, screen, 0, 0)
+        draw_text('Firepower: %s' % int(firepower), font, screen, 0, 20),
+        draw_text('Aliens killed: %s' % aliens_killed,
                  font, screen, WINDOWWIDTH/2, 0)
-        draw_text('Score: %s' % (score), font, screen, WINDOWWIDTH/2, 20)
+        draw_text('Accuracy: %s' % accuracy, font, screen, WINDOWWIDTH/2, 20)
 
         allsprites.update(clock.tick(FPS) / 1000.)
         allsprites.draw(screen)
