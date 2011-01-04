@@ -255,9 +255,9 @@ class Spawner(object):
         self.n == 0
 
 class LevelController(object):
-    def __init__(self):
+    def __init__(self, level=1):
         self.spawn_timer = 0
-        self.level = 1
+        self.level = level # overridable for testing specific levels
         self.levels = self.instanciate_levels()
 
     def is_game_finished(self):
