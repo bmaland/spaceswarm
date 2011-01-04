@@ -349,7 +349,9 @@ while True:
                     shots += 1
             elif event.type is KEYDOWN:
                 if event.key == K_SPACE:
-                    if firepower > 500:
+                    if firepower > 500: # nuke!
+                        screen.fill(RED)
+                        pygame.display.flip()
                         firepower -= 400
                         aliens_killed += len(aliens)
                         for a in aliens: a.kill()
