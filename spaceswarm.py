@@ -351,7 +351,11 @@ draw_text('Space Swarm!', title_font, screen, 20,
          20, RED)
 draw_text('To defend Earth, fend off the aliens with your missiles.',
          font, screen, 20, 60)
-draw_text('Press any key to start.', font, screen, 20, 90)
+draw_text('Keep track of your firepower, be as accurate as possible.',
+          font, screen, 20, 90)
+draw_text('Nukes are available when you reach 200 firepower (SPACE key).',
+          font, screen, 20, 120)
+draw_text('Press any key to start.', font, screen, 20, 180)
 draw_text("v"+".".join([str(x) for x in SPACESWARM_VERSION]), font, screen,
           20, WINDOWHEIGHT-40)
 pygame.display.update()
