@@ -297,28 +297,36 @@ class LevelController(object):
     def instanciate_levels(self):
         return {
             1: { 'aliens': Spawner(Alien, 55, 8),
-             'spawn_rate': 90, 'multiplier': 1 },
+             'spawn_rate': 80, 'multiplier': 1 },
             2: { 'aliens': Spawner(Alien, 60, 12),
                  'spawn_rate': 80, 'multiplier': 1 },
-            3: { 'aliens': Spawner(Alien, 65, 14),
+            3: { 'aliens': Spawner(Alien, 70, 14),
                  'spawn_rate': 40, 'multiplier': 1 },
-            4: { 'aliens': Spawner(Alien, 70, 16),
-                 'spawn_rate': 40, 'multiplier': 1 },
-            5: { 'aliens': Spawner(Alien, 45, 18),
-                 'spawn_rate': 35, 'multiplier': 2 },
-            6: { 'aliens': Spawner(Alien, 50, 20),
+            4: { 'aliens': [Spawner(Alien, 70, 10),
+                            Spawner(TinyAlien, 50, 6)],
+                 'spawn_rate': 50, 'multiplier': 1 },
+            5: { 'aliens': Spawner(SmartAlien, 62, 20),
                  'spawn_rate': 40, 'multiplier': 2 },
-            7: { 'aliens': Spawner(Alien, 30, 27),
-                 'spawn_rate': 80, 'multiplier': 3 },
-            8: { 'aliens': [Spawner(SmartAlien, 60, 20),
-                            Spawner(Alien, 120, 10)],
+            6: { 'aliens': [Spawner(ChangelingAlien, 40, 10),
+                            Spawner(TinyAlien, 50, 10)],
                  'spawn_rate': 70, 'multiplier': 2 },
-            9: { 'aliens': [Spawner(SmartAlien, (45, 70), 20),
-                            Spawner(Alien, 80, 10)],
-                 'spawn_rate': 60, 'multiplier': 2},
-            10: { 'aliens': [Spawner(SmartAlien, (50, 80), 42),
+            7: { 'aliens': [Spawner(TinyAlien, 70, 10),
+                            Spawner(ChangelingAlien, 60, 20)],
+                 'spawn_rate': 130, 'multiplier': 3 },
+            8: { 'aliens': Spawner(TinyAlien, 35, 24),
+                 'spawn_rate': 80, 'multiplier': 2 },
+            9: { 'aliens': [Spawner(Alien, 30, 27),
+                            Spawner(ChangelingAlien, 55, 9)],
+                 'spawn_rate': 75, 'multiplier': 3 },
+            10: { 'aliens': [Spawner(SmartAlien, 60, 20),
+                            Spawner(Alien, 120, 10)],
+                 'spawn_rate': 80, 'multiplier': 2 },
+            11: { 'aliens': [Spawner(SmartAlien, (45, 70), 20),
+                            Spawner(TinyAlien, 40, 10)],
+                 'spawn_rate': 70, 'multiplier': 2},
+            12: { 'aliens': [Spawner(SmartAlien, (50, 80), 42),
                              Spawner(Alien, 35, 30)],
-                  'spawn_rate': 60, 'multiplier': 4 },
+                  'spawn_rate': 90, 'multiplier': 4 },
         }
 
 bg = load_image("bg.jpg")
@@ -365,7 +373,7 @@ while True:
     Bullet.containers = bullets, allsprites
     Explosion.containers = allsprites
 
-    level_controller = LevelController()
+    level_controller = LevelController(1)
     if pygame.mixer.get_init(): pygame.mixer.music.play(-1, 0.0)
 
     player = Player()
@@ -375,15 +383,15 @@ while True:
             if event.type is MOUSEBUTTONDOWN: # weapon fired
                 if firepower > 10:
                     if not muted: weapon_sound.play()
-                    firepower -= 10
+                    firepower -= 7.5
                     Bullet(pygame.mouse.get_pos())
                     shots += 1
             elif event.type is KEYDOWN:
                 if event.key == K_SPACE:
-                    if firepower > 500: # nuke!
+                    if firepower > 200: # nuke!
                         screen.fill(RED)
                         pygame.display.flip()
-                        firepower -= 400
+                        firepower -= 150
                         aliens_killed += len(aliens)
                         for a in aliens: a.kill()
                 elif event.key == K_ESCAPE or event.key == K_q:
@@ -400,10 +408,10 @@ while True:
             elif event.type is QUIT:
                 terminate()
 
-        if firepower < 50:
-            firepower += 0.3
+        if firepower < 100:
+            firepower += 0.15
         else:
-            firepower += min(0.2, firepower/1000.0)
+            firepower += (30/(firepower*1.5))/2
 
         level_controller.tick() # spawns new aliens
 
@@ -419,7 +427,9 @@ while True:
             aliens_killed += 1
             accuracy = int(round((float(aliens_killed)/shots)*100))
             if isinstance(a, SmartAlien):
-                firepower += 15
+                firepower += 12.5
+            elif isinstance(a, TinyAlien) or isinstance(a, ChangelingAlien):
+                firepower += 10
             else:
                 firepower += 7.5 # regular alien
             if not muted: alien_killed_sound.play()
@@ -427,7 +437,7 @@ while True:
         # FIXME
         if level_controller.current_spawner().n == 0 and len(aliens) == 0:
             if not muted: levelup_sound.play()
-            firepower += 10
+            firepower += 25
             if level_controller.is_game_finished():
                 game_finished = True
                 break
