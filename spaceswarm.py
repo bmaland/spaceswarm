@@ -437,7 +437,12 @@ while True:
         # Redraw screen
         screen.blit(*bg)
         draw_text('Level: %s' % level_controller.level, font, screen, 0, 0)
-        draw_text('Firepower: %s' % int(firepower), font, screen, 0, 20),
+
+        # Draw firepower in red if we can afford a nuke
+        fpcol = WHITE
+        if firepower >= 200: fpcol = RED
+
+        draw_text('Firepower: %s' % int(firepower), font, screen, 0, 20, fpcol)
         draw_text('Aliens killed: %s' % aliens_killed,
                  font, screen, WINDOWWIDTH/2, 0)
         draw_text('Accuracy: %s' % accuracy, font, screen, WINDOWWIDTH/2, 20)
