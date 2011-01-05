@@ -155,7 +155,7 @@ class TinyAlien(Alien):
 
 class ChangelingAlien(Alien):
     def __init__(self, speed=100):
-        Alien.__init__(self, speed, Alien.image)
+        Alien.__init__(self, speed)
         self._orig_speed = speed
         self._change_timer = 25
 
@@ -384,12 +384,24 @@ while True:
 
     while True: # Game loop
         for event in pygame.event.get():
-            if event.type is MOUSEBUTTONDOWN: # weapon fired
-                if firepower > 10:
+            if event.type is MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pressed() == (1,0,0) and firepower > 10:
                     if not muted: weapon_sound.play()
                     firepower -= 7.5
                     Bullet(pygame.mouse.get_pos())
-                    shots += 1
+                elif pygame.mouse.get_pressed() == (0,0,1) and firepower > 100:
+                    if not muted: weapon_sound.play()
+                    firepower -= 50
+                    shots += 8
+                    Bullet((0, 0)) # top left
+                    Bullet((WINDOWWIDTH/2, 0)) # top middle
+                    Bullet((WINDOWWIDTH, 0)) # top right
+                    Bullet((WINDOWWIDTH, WINDOWHEIGHT/2)) # right
+                    Bullet((WINDOWWIDTH, WINDOWHEIGHT)) # bottom right
+                    Bullet((WINDOWWIDTH/2, WINDOWHEIGHT)) # bottom middle
+                    Bullet((0, WINDOWHEIGHT)) # bottom left
+                    Bullet((0, WINDOWHEIGHT/2)) # left
+
             elif event.type is KEYDOWN:
                 if event.key == K_SPACE:
                     if firepower > 200: # nuke!
