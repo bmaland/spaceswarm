@@ -388,10 +388,11 @@ while True:
                 if pygame.mouse.get_pressed() == (1,0,0) and firepower > 10:
                     if not muted: weapon_sound.play()
                     firepower -= 7.5
+                    shots += 1
                     Bullet(pygame.mouse.get_pos())
                 elif pygame.mouse.get_pressed() == (0,0,1) and firepower > 100:
                     if not muted: weapon_sound.play()
-                    firepower -= 50
+                    firepower -= 75
                     shots += 8
                     Bullet((0, 0)) # top left
                     Bullet((WINDOWWIDTH/2, 0)) # top middle
@@ -405,6 +406,7 @@ while True:
             elif event.type is KEYDOWN:
                 if event.key == K_SPACE:
                     if firepower > 200: # nuke!
+                        shots += 1 # FIXME nukes break accuracy
                         screen.fill(RED)
                         pygame.display.flip()
                         firepower -= 150

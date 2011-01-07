@@ -4,7 +4,12 @@ A simple arcade game created with pygame.
 
 Keys:
 
-Mouse to aim/shoot, P for pause, Q for quit, M for mute, SPACE for nuke.
+P for pause, Q for quit, M for mute.
+
+Mouse to aim, left click for regular shot, right click for burst shot. SPACE for
+nuke.
+
+The firepower meter restricts weapon usage.
 
 For code, issues, patches, or suggestions for improvement, visit the project
 site at http://github.com/bmaland/spaceswarm
