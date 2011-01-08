@@ -17,6 +17,10 @@ TEXTCOLOR = WHITE
 BACKGROUNDCOLOR = BLACK
 FPS = 40
 
+EASY = -10
+MEDIUM = 0
+HARD = 10
+
 random.seed()
 pygame.init()
 pygame.mouse.set_visible(False) # we blit the mouse instead
@@ -51,7 +55,7 @@ def wait_for_player():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     terminate()
-                return
+                return event.key
 
 def get_n_points_on_circle(center, radius, n=10):
     alpha = math.pi * 2. / n
@@ -245,18 +249,19 @@ class Spawner(object):
         self.speed = speed
         self.n = n
 
-    def spawn(self):
+    def spawn(self, difficulty):
         self.n -= 1
         if type(self.speed) == tuple:
-            return self.klass(random.randint(self.speed[0], self.speed[1]))
-        return self.klass(self.speed)
+            return self.klass(random.randint(*self.speed) + difficulty)
+        return self.klass(self.speed + difficulty)
 
     def empty(self):
         self.n == 0
 
 class LevelController(object):
-    def __init__(self, level=1):
+    def __init__(self, level=1, difficulty=MEDIUM):
         self.spawn_timer = 0
+        self.difficulty = difficulty
         self.level = level # overridable for testing specific levels
         self.levels = self.instanciate_levels()
 
@@ -268,7 +273,8 @@ class LevelController(object):
         self.level += 1
 
     def is_spawn_time(self):
-        return self.current_level()['spawn_rate'] == self.spawn_timer and \
+        return self.current_level()['spawn_rate'] - \
+               (self.difficulty) == self.spawn_timer and \
                self.current_spawner().n > 0
 
     def current_spawner(self):
@@ -289,7 +295,7 @@ class LevelController(object):
 
     def spawn(self):
         for i in range(self.current_level()['multiplier']):
-            self.current_spawner().spawn()
+            self.current_spawner().spawn(self.difficulty)
 
     def current_level(self):
         return self.levels[self.level]
@@ -355,11 +361,13 @@ draw_text('Keep track of your firepower, be as accurate as possible.',
           font, screen, 20, 90)
 draw_text('Nukes are available when you reach 200 firepower (SPACE key).',
           font, screen, 20, 120)
-draw_text('Press any key to start.', font, screen, 20, 180)
+draw_text('Press 1 for easy, 2 (or any key) for medium, 3 for hard.',
+          font, screen, 20, 180)
 draw_text("v"+".".join([str(x) for x in SPACESWARM_VERSION]), font, screen,
           20, WINDOWHEIGHT-40)
 pygame.display.update()
-wait_for_player()
+
+difficulty = wait_for_player()
 
 while True:
     # setup
@@ -372,12 +380,19 @@ while True:
     shots = 0
     accuracy = 0
 
+    if difficulty == K_1:
+        difficulty = EASY
+    elif difficulty == K_3:
+        difficulty = HARD
+    else:
+        difficulty = MEDIUM
+
     Player.containers = allsprites
     Alien.containers = aliens, allsprites
     Bullet.containers = bullets, allsprites
     Explosion.containers = allsprites
 
-    level_controller = LevelController(1)
+    level_controller = LevelController(1, difficulty)
     if pygame.mixer.get_init(): pygame.mixer.music.play(-1, 0.0)
 
     player = Player()
@@ -497,4 +512,4 @@ while True:
         draw_text('Press any key to play again, or Esc to quit.', font,
              screen, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 150)
     pygame.display.update()
-    wait_for_player()
+    difficulty = wait_for_player()
