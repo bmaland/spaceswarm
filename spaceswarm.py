@@ -489,8 +489,9 @@ while True:
         screen.blit(*bg)
         draw_text('Level: %s' % level_controller.level, font, screen, 0, 0)
 
-        # Draw firepower in red if we can afford a nuke
+        # Draw firepower in green if we can afford burst, red if we can afford a nuke
         fpcol = WHITE
+        if firepower >= 100: fpcol = GREEN
         if firepower >= 200: fpcol = RED
 
         draw_text('Firepower: %s' % int(firepower), font, screen, 0, 20, fpcol)
