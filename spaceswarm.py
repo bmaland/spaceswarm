@@ -73,6 +73,7 @@ def draw_text(text, font, surface, x, y, color=TEXTCOLOR):
     rect.topleft = (x, y)
     surface.blit(text, rect)
 
+
 class GameObject(pygame.sprite.Sprite):
     def __init__(self, image, rect, destination=None):
         pygame.sprite.Sprite.__init__(self, self.containers)
@@ -87,6 +88,7 @@ class GameObject(pygame.sprite.Sprite):
         heading.normalize()
         d = heading * time_passed_seconds * speed
         self.rect.move_ip(round(d.x), round(d.y))
+
 
 class Player(GameObject):
     image = load_image("player.png")
@@ -109,6 +111,7 @@ class Explosion(GameObject):
     def update(self, time_passed):
         self._ttl -= 1
         if self._ttl == 0: self.kill()
+
 
 class Alien(GameObject):
     image = load_image("alien.png")
@@ -149,6 +152,7 @@ class Alien(GameObject):
 
     def update(self, time_passed):
         super(Alien, self).move(time_passed, self.speed())
+
 
 class TinyAlien(Alien):
     image = (pygame.transform.scale(load_image("alien.png")[0], (25,25)),)
@@ -208,6 +212,7 @@ class SmartAlien(Alien):
         if lv.get_distance_to(dv) < 2:
             self._new_destination()
 
+
 class Bullet(GameObject):
     image = load_image("bullet.png")
     width, height = image[0].get_size()
@@ -243,6 +248,7 @@ class Bullet(GameObject):
                or self.rect.left <= 0 or self.rect.right >= WINDOWWIDTH:
             self.kill()
 
+
 class Spawner(object):
     def __init__(self, klass, speed, n):
         self.klass = klass
@@ -257,6 +263,7 @@ class Spawner(object):
 
     def empty(self):
         self.n == 0
+
 
 class LevelController(object):
     def __init__(self, level=1, difficulty=MEDIUM):
@@ -334,6 +341,7 @@ class LevelController(object):
                              Spawner(Alien, 35, 30)],
                   'spawn_rate': 90, 'multiplier': 4 },
         }
+
 
 bg = load_image("bg.jpg")
 clock = pygame.time.Clock()
