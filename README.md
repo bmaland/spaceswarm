@@ -39,5 +39,6 @@ from http://pygame.org/ftp/pygame-1.9.1release-py2.6-macosx10.5.zip
 
 The wave files were found on the internet and are (c) their respective
 owners. Images of space and earth are (c) NASA. Vector2 class by Will
-McGugan. The rest is created by Bjørn Arild Mæland (c) 2010. Released under the
-MIT License.
+McGugan. The rest is created by Bjørn Arild Mæland (c) 2010-2011.
+
+Released under the MIT License.
