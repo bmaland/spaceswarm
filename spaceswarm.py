@@ -56,7 +56,8 @@ def wait_for_player():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     terminate()
-                return event.key
+                if not event.key in [K_RCTRL, K_LCTRL, K_RALT, K_LALT, K_TAB]:
+                    return event.key
 
 def get_n_points_on_circle(center, radius, n=10):
     alpha = math.pi * 2. / n
