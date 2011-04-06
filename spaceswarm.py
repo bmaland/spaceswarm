@@ -50,6 +50,7 @@ def terminate():
 def wait_for_player():
     while True:
         for event in pygame.event.get():
+            clock.tick(FPS)
             if event.type == QUIT:
                 terminate()
             if event.type == KEYDOWN:
