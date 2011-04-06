@@ -367,10 +367,12 @@ draw_text('To defend Earth, fend off the aliens with your missiles.',
          font, screen, 20, 60)
 draw_text('Keep track of your firepower, be as accurate as possible.',
           font, screen, 20, 90)
-draw_text('Nukes are available when you reach 200 firepower (SPACE key).',
+draw_text('Burst-shots cost 100 firepower (Right click).',
           font, screen, 20, 120)
+draw_text('Nukes cost 200 firepower (SPACE key).',
+          font, screen, 20, 150)
 draw_text('Press 1 for easy, 2 (or any key) for medium, 3 for hard.',
-          font, screen, 20, 180)
+          font, screen, 20, 210)
 draw_text("v"+".".join([str(x) for x in SPACESWARM_VERSION]), font, screen,
           20, WINDOWHEIGHT-40)
 pygame.display.update()
